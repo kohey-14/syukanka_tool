@@ -171,7 +171,7 @@
     <div id="habit-list"></div>
 
     <script>
-        // ▼▼▼ あなたのURLを埋め込みました ▼▼▼
+        // ▼▼▼ あなたの新しいウェブアプリURLを埋め込みました ▼▼▼
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-gjPZTKo2-9F8IpCksFjn-BkpC6yPYv0eHOgyM1ZollaZAc8E1K_agL-HvvP243be/exec";
 
         const listContainer = document.getElementById('habit-list');
@@ -204,7 +204,9 @@
             } catch (e) {
                 console.error(e);
                 document.getElementById('garden-message').textContent = "Connection Error";
-                // デモ用に仮データを表示しても良いですが、今回はエラー表示のみ
+                // 画面にエラー理由を少し詳しく出す
+                const list = document.getElementById('habit-list');
+                list.innerHTML = `<p style="text-align:center;color:red;font-size:12px;">読み込みに失敗しました。<br>GASのデプロイが「全員」になっているか、<br>スプレッドシートの1行目C列が<br>「history」になっているか確認してください。</p>`;
             }
         }
 
@@ -298,8 +300,7 @@
             document.getElementById('garden-message').textContent = `Lv.${Math.floor(totalDone/5)+1} ${currentLevel.title}`;
             document.getElementById('total-count').textContent = totalDone;
 
-            // プログレスバー（前のレベルからの進捗率）
-            // 簡易的に 0〜nextThreshold で計算
+            // プログレスバー
             const progress = Math.min(100, (totalDone / nextThreshold) * 100);
             document.getElementById('exp-bar').style.width = `${progress}%`;
         }
@@ -336,7 +337,6 @@
                 });
             } catch (e) {
                 console.error("Save Error", e);
-                // エラー時はロールバックしても良いですが、今回は省略
             }
         }
 
