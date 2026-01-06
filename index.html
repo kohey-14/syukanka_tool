@@ -29,19 +29,18 @@
             display: flex;
             flex-direction: column;
             transition: background-color 1s ease;
+            user-select: none; /* テキスト選択防止 */
         }
         
-        /* 緊急モード（夜かつ未完了）の背景アニメーション */
-        body.urgent-mode {
-            animation: urgentPulse 4s infinite;
-        }
+        /* 緊急モード（夜かつ未完了） */
+        body.urgent-mode { animation: urgentPulse 4s infinite; }
         @keyframes urgentPulse {
             0% { background-color: #f2f2f7; }
-            50% { background-color: #ffe5e5; } /* 薄い赤 */
+            50% { background-color: #ffe5e5; }
             100% { background-color: #f2f2f7; }
         }
 
-        /* --- 上部情報エリア --- */
+        /* --- ヘッダー --- */
         .header-info {
             background: rgba(255,255,255,0.9);
             backdrop-filter: blur(10px);
@@ -61,12 +60,11 @@
             font-size: 12px;
             font-weight: bold;
             margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .remaining-badge.zero {
-            background: var(--primary);
-        }
+        .remaining-badge.zero { background: var(--primary); }
 
-        /* --- タブエリア --- */
+        /* --- タブ --- */
         .tab-scroll-container {
             background: white;
             padding: 10px 0;
@@ -101,24 +99,20 @@
             color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
-        /* ステータスドット */
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--danger); /* 未完了は赤 */
+            background-color: var(--danger);
         }
-        .status-dot.done {
-            background-color: var(--primary); /* 完了は緑 */
-        }
+        .status-dot.done { background-color: var(--primary); }
 
-        /* --- メインコンテンツ --- */
+        /* --- コンテンツ --- */
         #content-area {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
         }
-
         .habit-page {
             display: none;
             flex-direction: column;
@@ -131,23 +125,61 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 植物エリア */
-        .plant-area { text-align: center; margin-bottom: 20px; }
+        /* 植物とおしゃべり吹き出し */
+        .plant-area { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            position: relative;
+            height: 160px; /* 高さ固定 */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        /* 吹き出し */
+        .speech-bubble {
+            position: relative;
+            background: var(--text-main);
+            color: white;
+            border-radius: 15px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: popIn 0.5s forwards 0.2s;
+            max-width: 200px;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: var(--text-main) transparent transparent transparent;
+        }
+        @keyframes popIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .plant-icon {
             font-size: 80px;
             display: block;
-            margin-bottom: 5px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-            transition: transform 0.3s;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
         }
-        .plant-icon:active { transform: scale(1.1); }
+        .plant-icon:active { transform: scale(0.9) rotate(-5deg); }
         
         .habit-level {
             font-size: 14px;
             color: var(--text-sub);
             font-weight: 600;
+            margin-top: 5px;
         }
-        /* 連続記録の炎 */
         .streak-fire {
             font-size: 16px;
             color: #ff9500;
@@ -156,9 +188,9 @@
             filter: drop-shadow(0 0 4px rgba(255, 149, 0, 0.5));
         }
 
-        /* スイッチ */
+        /* スイッチボタン */
         .big-switch-container {
-            margin: 10px 0 30px;
+            margin: 0 0 30px;
             text-align: center;
         }
         .check-btn {
@@ -173,15 +205,17 @@
             font-size: 32px;
             color: #e5e5ea;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            margin-bottom: 8px;
         }
+        .check-btn:active { transform: scale(0.9); }
         .check-btn.checked {
             background: var(--primary);
             border-color: var(--primary);
             color: white;
             transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(52, 199, 89, 0.4);
+            box-shadow: 0 10px 25px rgba(52, 199, 89, 0.4);
         }
 
         /* カレンダー */
@@ -213,6 +247,7 @@
             font-size: 13px;
             border-radius: 50%;
             color: var(--text-main);
+            transition: background 0.3s;
         }
         .day-cell.today {
             border: 2px solid var(--text-main);
@@ -230,7 +265,7 @@
 <body>
 
     <div class="header-info">
-        <div id="status-badge" class="remaining-badge">読み込み中...</div>
+        <div id="status-badge" class="remaining-badge">Reading data...</div>
     </div>
 
     <div class="tab-scroll-container">
@@ -242,7 +277,7 @@
     </div>
 
     <script>
-        // ↓↓↓ URLを書き換えてください ↓↓↓
+        // ↓↓↓ URLの書き換えをお願いします！ ↓↓↓
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-gjPZTKo2-9F8IpCksFjn-BkpC6yPYv0eHOgyM1ZollaZAc8E1K_agL-HvvP243be/exec";
 
         const tabList = document.getElementById('tab-list');
@@ -251,7 +286,7 @@
         const todayStr = new Date().toISOString().split('T')[0];
         let habitsData = [];
 
-        // 植物レベル定義
+        // 植物データ
         const plantLevels = [
             { threshold: 0, icon: "🌱", title: "Start" },
             { threshold: 3, icon: "🌿", title: "Step 1" },
@@ -260,6 +295,44 @@
             { threshold: 30, icon: "🍎", title: "Master" },
             { threshold: 100, icon: "👑", title: "Legend" }
         ];
+
+        // セリフデータ（状況に応じてランダム表示）
+        const speechPatterns = {
+            notDone: ["待ってるよ！", "お水ちょうだい", "今日はまだ？", "成長したいな", "準備OK！"],
+            done: ["ありがとう！", "美味しい！", "最高！", "やったね！", "明日も頼むよ！"],
+            streak: ["燃えてきた！", "調子いい！", "無敵モード！", "君は天才だ！"]
+        };
+
+        // --- 音を生成する機能（Web Audio API） ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'done') {
+                // ポコン♪（高めの音）
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else {
+                // シュン...（キャンセル音）
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            }
+        }
 
         async function fetchHabits() {
             try {
@@ -270,7 +343,6 @@
                 
                 habitsData = JSON.parse(text);
                 document.getElementById('loading').style.display = 'none';
-                
                 renderApp();
             } catch (e) {
                 console.error(e);
@@ -287,8 +359,6 @@
             tabList.innerHTML = '';
             contentArea.innerHTML = '';
 
-            // 前回のタブ位置を記憶しておきたいが、簡易的に0番目を開く
-            // (リロード時以外は維持される)
             habitsData.forEach((habit, index) => {
                 const isDone = habit.history.includes(todayStr);
 
@@ -296,7 +366,6 @@
                 const tab = document.createElement('div');
                 tab.className = `tab-item ${index === 0 ? 'active' : ''}`;
                 tab.id = `tab-${index}`;
-                // タブの中身：ドット + 名前
                 tab.innerHTML = `<span class="status-dot ${isDone ? 'done' : ''}"></span> ${habit.name}`;
                 tab.onclick = () => switchTab(index);
                 tabList.appendChild(tab);
@@ -306,8 +375,6 @@
                 if (index === 0) page.classList.add('active');
                 contentArea.appendChild(page);
             });
-            
-            // 初回表示時にも緊急モードチェック
             checkUrgency(0);
         }
 
@@ -320,13 +387,20 @@
             const levelInfo = getLevelInfo(count);
             const isDoneToday = habit.history.includes(todayStr);
             const streak = calculateStreak(habit.history);
-
-            // 炎アイコン（3日連続以上で表示）
             const fireIcon = streak >= 3 ? `<span class="streak-fire">🔥${streak}</span>` : '';
 
+            // セリフ決定
+            let speech = "";
+            if (isDoneToday) {
+                speech = streak >= 5 ? getRandom(speechPatterns.streak) : getRandom(speechPatterns.done);
+            } else {
+                speech = getRandom(speechPatterns.notDone);
+            }
+
             page.innerHTML = `
-                <div class="plant-area">
-                    <div class="plant-icon">${levelInfo.icon}</div>
+                <div class="plant-area" onclick="pokePlant(${index})">
+                    <div class="speech-bubble" id="bubble-${index}">${speech}</div>
+                    <div class="plant-icon" id="plant-icon-${index}">${levelInfo.icon}</div>
                     <div class="habit-level">
                         Lv.${Math.floor(count/5)+1} ${levelInfo.title}
                         ${fireIcon}
@@ -338,8 +412,8 @@
                             onclick="toggleHabit('${habit.id}', ${index})">
                         ${isDoneToday ? '✔' : '+'}
                     </button>
-                    <div style="margin-top:10px; font-size:12px; color:#8e8e93;">
-                        ${isDoneToday ? '完了！素晴らしい！' : 'タップして記録'}
+                    <div id="msg-${index}" style="margin-top:10px; font-size:12px; color:#8e8e93;">
+                        ${isDoneToday ? '完了！' : 'タップして記録'}
                     </div>
                 </div>
             `;
@@ -351,7 +425,6 @@
         function createCalendar(history) {
             const wrapper = document.createElement('div');
             wrapper.className = 'calendar-card';
-
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
@@ -365,19 +438,15 @@
             grid.className = 'days-grid';
 
             const lastDate = new Date(year, month + 1, 0).getDate();
-            // 簡易的に1日から並べる（曜日は省略してシンプルに）
             for (let d = 1; d <= lastDate; d++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
                 cell.textContent = d;
-
                 const mStr = (month + 1).toString().padStart(2, '0');
                 const dStr = d.toString().padStart(2, '0');
                 const dateStr = `${year}-${mStr}-${dStr}`;
-
                 if (history.includes(dateStr)) cell.classList.add('done');
                 if (dateStr === todayStr) cell.classList.add('today');
-
                 grid.appendChild(cell);
             }
             wrapper.appendChild(grid);
@@ -390,78 +459,80 @@
             checkUrgency(index);
         }
 
-        // 全体のステータス更新
         function updateTotalStatus() {
             const total = habitsData.length;
             const doneCount = habitsData.filter(h => h.history.includes(todayStr)).length;
             const remaining = total - doneCount;
 
             if (remaining === 0) {
-                statusBadge.textContent = "🎉 全て完了！お疲れ様です";
+                statusBadge.textContent = "🎉 全て完了！Excellent!";
                 statusBadge.className = "remaining-badge zero";
-                document.body.classList.remove('urgent-mode'); // 完了したら緊急解除
+                document.body.classList.remove('urgent-mode');
             } else {
-                statusBadge.textContent = `残り ${remaining} つの習慣`;
+                statusBadge.textContent = `残り ${remaining} つ`;
                 statusBadge.className = "remaining-badge";
             }
         }
 
-        // 時間帯と未完了による「緊急モード」チェック
         function checkUrgency(currentIndex) {
             const nowHour = new Date().getHours();
             const currentHabit = habitsData[currentIndex];
             const isDone = currentHabit.history.includes(todayStr);
+            if (nowHour >= 20 && !isDone) document.body.classList.add('urgent-mode');
+            else document.body.classList.remove('urgent-mode');
+        }
 
-            // 夜20時以降 かつ 未完了なら背景を少し赤くする
-            if (nowHour >= 20 && !isDone) {
-                document.body.classList.add('urgent-mode');
-            } else {
-                document.body.classList.remove('urgent-mode');
-            }
+        // 植物をつつく遊び
+        function pokePlant(index) {
+            // 音を鳴らす
+            playSound('done'); 
+            // 吹き出しをランダムに変更
+            const bubble = document.getElementById(`bubble-${index}`);
+            bubble.style.animation = 'none';
+            bubble.offsetHeight; /* trigger reflow */
+            bubble.style.animation = 'popIn 0.3s forwards';
+            bubble.textContent = getRandom([...speechPatterns.done, ...speechPatterns.streak]);
         }
 
         async function toggleHabit(id, index) {
             const habit = habitsData.find(h => h.id == id);
             const isDone = habit.history.includes(todayStr);
-
-            // 1. データ更新
-            if (isDone) {
-                habit.history = habit.history.filter(d => d !== todayStr);
-            } else {
-                habit.history.push(todayStr);
-                confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-            }
-
-            // 2. UI部分更新（再描画せずDOM操作で高速化）
             const page = document.getElementById(`page-${index}`);
             const btn = page.querySelector('.check-btn');
-            
-            // ボタン見た目
-            if (!isDone) { // 今回やった
-                btn.classList.add('checked');
-                btn.innerHTML = '✔';
-                page.querySelector('.big-switch-container div:last-child').textContent = '完了！素晴らしい！';
-            } else { // 取り消し
+            const bubble = document.getElementById(`bubble-${index}`);
+            const msg = document.getElementById(`msg-${index}`);
+
+            // 1. 状態更新
+            if (isDone) {
+                habit.history = habit.history.filter(d => d !== todayStr);
                 btn.classList.remove('checked');
                 btn.innerHTML = '+';
-                page.querySelector('.big-switch-container div:last-child').textContent = 'タップして記録';
+                msg.textContent = "タップして記録";
+                playSound('cancel');
+                bubble.textContent = getRandom(speechPatterns.notDone);
+            } else {
+                habit.history.push(todayStr);
+                btn.classList.add('checked');
+                btn.innerHTML = '✔';
+                msg.textContent = "完了！";
+                playSound('done'); // 音！
+                if (navigator.vibrate) navigator.vibrate(50); // 振動！
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+                bubble.textContent = getRandom(speechPatterns.done);
             }
 
-            // タブのドット更新
+            // 2. UI更新
             const tabDot = document.getElementById(`tab-${index}`).querySelector('.status-dot');
-            if(!isDone) tabDot.classList.add('done');
-            else tabDot.classList.remove('done');
+            if(!isDone) tabDot.classList.add('done'); else tabDot.classList.remove('done');
 
-            // カレンダー再描画（シンプルに置換）
             const oldCal = page.querySelector('.calendar-card');
             const newCal = createCalendar(habit.history);
             page.replaceChild(newCal, oldCal);
 
-            // 3. 全体ステータス更新
             updateTotalStatus();
-            checkUrgency(index); // 今のページの状態に合わせて背景更新
+            checkUrgency(index);
 
-            // 4. 送信
+            // 3. 送信
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -471,37 +542,26 @@
             } catch (e) { console.error(e); }
         }
 
-        // ストリーク計算（連続達成日数）
         function calculateStreak(history) {
             let streak = 0;
             const d = new Date();
-            // 今日から過去へ遡る
-            // (今日やってなくても昨日の分があればストリークは維持される計算にする場合は調整が必要だが、今回はシンプルに)
-            
-            // まず「今日」が含まれていればカウント
             if(history.includes(todayStr)) streak++;
-            
-            // 昨日から遡る
             for(let i=1; i<365; i++) {
                 d.setDate(d.getDate() - 1);
                 const dateStr = d.toISOString().split('T')[0];
-                if(history.includes(dateStr)) {
-                    streak++;
-                } else {
-                    // 今日やってなくて、昨日もやってないなら0
-                    // 今日やってて、昨日やってないなら1で終了
-                    break;
-                }
+                if(history.includes(dateStr)) streak++; else break;
             }
             return streak;
         }
 
         function getLevelInfo(count) {
             let info = plantLevels[0];
-            for (const l of plantLevels) {
-                if (count >= l.threshold) info = l;
-            }
+            for (const l of plantLevels) if (count >= l.threshold) info = l;
             return info;
+        }
+
+        function getRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
         }
 
         fetchHabits();
