@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Habit Focus Pro</title>
-    
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-mobile-web-app-icon" href="icon.png">
 
+    <link rel="icon" type="image/png" href="app-icon.png">
+    <link rel="apple-mobile-web-app-icon" href="app-icon.png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -64,20 +63,17 @@
         .habit-page.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 植物エリア (シンプル化) */
+        /* 植物エリア */
         .plant-area {
-            text-align: center;
-            margin-bottom: 15px;
+            text-align: center; margin-bottom: 15px;
             display: flex; flex-direction: column; align-items: center;
         }
         .plant-icon {
-            font-size: 80px; /* 少し大きく */
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-            margin-bottom: 10px;
+            font-size: 80px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); margin-bottom: 10px;
         }
         .habit-level { font-size: 13px; color: var(--text-sub); font-weight: bold; }
 
-        /* 進捗バー (新設) */
+        /* 進捗バー */
         .progress-bar-container {
             width: 80%; max-width: 240px; height: 12px;
             background-color: var(--border);
@@ -89,7 +85,6 @@
             width: 0%; transition: width 0.6s ease-out;
         }
 
-        /* ゴールテキスト */
         .goal-status {
             font-size: 14px; font-weight: bold; color: var(--text-main);
             margin-bottom: 25px; background: var(--card-bg); padding: 8px 16px;
@@ -156,25 +151,19 @@
     </style>
 </head>
 <body>
-
     <div class="tab-scroll-container">
         <div class="tab-list" id="tab-list"></div>
     </div>
-
     <div id="content-area">
         <div id="loading">読み込み中...</div>
     </div>
-
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 id="modal-title" style="margin-top:0;">習慣の設定</h3>
-            
             <label>習慣の名前</label>
             <input type="text" id="habit-name-input" placeholder="例: 筋トレ">
-            
             <label>目標日数 (0で目標なし)</label>
             <input type="number" id="habit-goal-input" placeholder="例: 30" min="0">
-            
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal()">キャンセル</button>
                 <button class="btn btn-primary" id="save-btn">保存</button>
@@ -192,10 +181,7 @@
         const tabList = document.getElementById('tab-list');
         const contentArea = document.getElementById('content-area');
         const todayStr = new Date().toISOString().split('T')[0];
-        
-        let habitsData = [];
-        let editIndex = -1;
-
+        let habitsData = []; let editIndex = -1;
         const plantLevels = [
             { threshold: 0, icon: "🌱", title: "Start" },
             { threshold: 3, icon: "🌿", title: "Step 1" },
@@ -221,8 +207,6 @@
         function renderApp() {
             tabList.innerHTML = '';
             contentArea.innerHTML = '';
-
-            // タブ生成
             habitsData.forEach((habit, index) => {
                 const tab = document.createElement('div');
                 tab.className = `tab-item ${index === 0 ? 'active' : ''}`;
@@ -230,13 +214,10 @@
                 tab.textContent = habit.name;
                 tab.onclick = () => switchTab(index);
                 tabList.appendChild(tab);
-
                 const page = createHabitPage(habit, index);
                 if (index === 0) page.classList.add('active');
                 contentArea.appendChild(page);
             });
-
-            // 追加ボタン
             const addTab = document.createElement('div');
             addTab.className = 'tab-item add-tab';
             addTab.textContent = '＋';
@@ -248,33 +229,25 @@
             const page = document.createElement('div');
             page.className = 'habit-page';
             page.id = `page-${index}`;
-
             const count = habit.history.length;
             const goal = habit.goal || 0;
             const isDoneToday = habit.history.includes(todayStr);
             const levelInfo = getLevelInfo(count);
-
-            // 進捗計算
             let percent = 0;
             let statusText = `累計 ${count} 日`;
-            
             if (goal > 0) {
                 percent = Math.min(100, (count / goal) * 100);
                 statusText = `${count} / ${goal} 日達成 (${Math.round(percent)}%)`;
             }
-
             page.innerHTML = `
                 <div class="plant-area">
                     <div class="plant-icon">${levelInfo.icon}</div>
                     <div class="habit-level">${levelInfo.title}</div>
                 </div>
-
                 <div class="progress-bar-container">
                     <div class="progress-bar-fill" style="width: ${percent}%;"></div>
                 </div>
-
                 <div class="goal-status">${statusText}</div>
-
                 <div class="action-row">
                     <div class="icon-btn" onclick="openEditModal(${index})">⚙️</div>
                     <button class="check-btn ${isDoneToday ? 'checked' : ''}" 
@@ -294,25 +267,18 @@
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
-            
             wrapper.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:15px;">${month + 1}月</div>`;
             const grid = document.createElement('div');
             grid.className = 'days-grid';
-
             const lastDate = new Date(year, month + 1, 0).getDate();
             for (let d = 1; d <= lastDate; d++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
                 cell.textContent = d;
                 const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-                
                 if (habit.history.includes(dateStr)) cell.classList.add('done');
                 if (dateStr === todayStr) cell.classList.add('today');
-                
-                cell.onclick = () => {
-                    if (new Date(dateStr) > new Date()) return;
-                    updateHabit(habit.id, dateStr, index);
-                };
+                cell.onclick = () => { if (new Date(dateStr) <= new Date()) updateHabit(habit.id, dateStr, index); };
                 grid.appendChild(cell);
             }
             wrapper.appendChild(grid);
@@ -329,12 +295,9 @@
         async function updateHabit(id, dateStr, index) {
             const habit = habitsData.find(h => h.id == id);
             const isDone = habit.history.includes(dateStr);
-            
-            // ローカル更新
             if (isDone) habit.history = habit.history.filter(d => d !== dateStr);
             else {
                 habit.history.push(dateStr);
-                // ゴール達成時の演出
                 if(habit.goal > 0 && habit.history.length === habit.goal && dateStr === todayStr) {
                      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
                      alert("🎉 目標達成おめでとうございます！ 🎉");
@@ -342,18 +305,13 @@
                      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
                 }
             }
-            
-            // 再描画
             const page = document.getElementById(`page-${index}`);
             const newPage = createHabitPage(habit, index);
             newPage.classList.add('active');
             contentArea.replaceChild(newPage, page);
-
-            // 送信
             postData({ action: 'toggle', id: id, date: dateStr, done: !isDone });
         }
 
-        // --- モーダル制御 ---
         const modal = document.getElementById('edit-modal');
         const nameInput = document.getElementById('habit-name-input');
         const goalInput = document.getElementById('habit-goal-input');
@@ -363,22 +321,16 @@
         function openAddModal() {
             editIndex = -1;
             modalTitle.textContent = "新しい習慣";
-            nameInput.value = "";
-            goalInput.value = "";
-            deleteArea.style.display = 'none';
-            modal.classList.add('open');
+            nameInput.value = ""; goalInput.value = "";
+            deleteArea.style.display = 'none'; modal.classList.add('open');
         }
-
         function openEditModal(index) {
             editIndex = index;
             const habit = habitsData[index];
             modalTitle.textContent = "設定を編集";
-            nameInput.value = habit.name;
-            goalInput.value = habit.goal || "";
-            deleteArea.style.display = 'block';
-            modal.classList.add('open');
+            nameInput.value = habit.name; goalInput.value = habit.goal || "";
+            deleteArea.style.display = 'block'; modal.classList.add('open');
         }
-
         function closeModal() { modal.classList.remove('open'); }
 
         document.getElementById('save-btn').onclick = async () => {
@@ -386,21 +338,15 @@
             const goal = parseInt(goalInput.value) || 0;
             if(!name) return;
             closeModal();
-
             if(editIndex === -1) {
-                // 追加
                 const tempId = Date.now();
                 habitsData.push({ id: tempId, name: name, history: [], goal: goal });
-                renderApp();
-                switchTab(habitsData.length - 1);
+                renderApp(); switchTab(habitsData.length - 1);
                 await postData({ action: 'add', name: name, goal: goal });
             } else {
-                // 編集
                 const habit = habitsData[editIndex];
-                habit.name = name;
-                habit.goal = goal;
-                renderApp();
-                switchTab(editIndex);
+                habit.name = name; habit.goal = goal;
+                renderApp(); switchTab(editIndex);
                 await postData({ action: 'edit', id: habit.id, name: name, goal: goal });
             }
         };
@@ -409,8 +355,7 @@
             if(!confirm("削除しますか？")) return;
             const habit = habitsData[editIndex];
             habitsData.splice(editIndex, 1);
-            closeModal();
-            renderApp();
+            closeModal(); renderApp();
             await postData({ action: 'delete', id: habit.id });
         };
 
