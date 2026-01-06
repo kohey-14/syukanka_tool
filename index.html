@@ -10,7 +10,7 @@
         :root {
             --bg-color: #f2f2f7;
             --card-bg: #ffffff;
-            --primary: #007aff; /* Apple Blue for crisp look */
+            --primary: #007aff;
             --danger: #ff3b30;
             --text-main: #1c1c1e;
             --text-sub: #8e8e93;
@@ -24,56 +24,35 @@
                 --text-main: #ffffff;
                 --text-sub: #98989d;
                 --border: #38383a;
-                --modal-bg: rgba(255,255,255,0.1);
+                --modal-bg: rgba(255,255,255,0.15);
             }
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0; padding: 0; padding-bottom: 40px;
-            height: 100vh;
-            display: flex; flex-direction: column;
-            user-select: none;
+            background-color: var(--bg-color); color: var(--text-main);
+            margin: 0; padding: 0; padding-bottom: 40px; height: 100vh;
+            display: flex; flex-direction: column; user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ヘッダー */
-        .header-info {
-            background: var(--card-bg);
-            padding: 50px 20px 10px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* タブエリア */
+        /* ヘッダー & タブ */
         .tab-scroll-container {
-            background: var(--card-bg);
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
+            background: var(--card-bg); padding: 50px 0 10px; /* 上部余白広め */
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
         }
-        .tab-list {
-            display: flex; overflow-x: auto; padding: 0 20px; gap: 12px;
-            scrollbar-width: none;
-        }
+        .tab-list { display: flex; overflow-x: auto; padding: 0 20px; gap: 12px; scrollbar-width: none; }
         .tab-list::-webkit-scrollbar { display: none; }
-        
         .tab-item {
-            white-space: nowrap; padding: 8px 14px;
-            border-radius: 18px; background: var(--bg-color);
-            color: var(--text-sub); font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; padding: 8px 14px; border-radius: 18px;
+            background: var(--bg-color); color: var(--text-sub); font-size: 13px; font-weight: 600;
             transition: all 0.2s; cursor: pointer;
         }
         .tab-item.active {
             background: var(--text-main); color: var(--card-bg);
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        /* 追加ボタン用タブ */
-        .tab-item.add-tab {
-            color: var(--primary); font-size: 16px; padding: 8px 16px;
-        }
+        .tab-item.add-tab { color: var(--primary); font-size: 16px; padding: 8px 16px; }
 
         /* コンテンツ */
         #content-area { flex: 1; padding: 20px; overflow-y: auto; }
@@ -81,31 +60,43 @@
         .habit-page.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 植物 */
-        .plant-area { text-align: center; margin-bottom: 20px; height: 160px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
-        .plant-icon { font-size: 80px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); transition: transform 0.2s; }
-        .plant-icon:active { transform: scale(0.9); }
-        .habit-level { font-size: 14px; color: var(--text-sub); font-weight: 600; margin-top: 5px; }
-        .speech-bubble {
-            background: var(--text-main); color: var(--card-bg); border-radius: 15px; padding: 6px 12px;
-            font-size: 12px; font-weight: bold; margin-bottom: 10px; position: relative;
+        /* 進捗リング & 植物エリア */
+        .progress-wrapper {
+            position: relative; width: 180px; height: 180px; margin-bottom: 20px;
+            display: flex; justify-content: center; align-items: center;
         }
-        .speech-bubble::after {
-            content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
-            border-width: 6px 6px 0; border-style: solid; border-color: var(--text-main) transparent transparent;
+        /* 植物を中心に配置 */
+        .plant-container {
+            position: absolute; text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .plant-icon { font-size: 60px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); margin-bottom: 5px; }
+        .habit-level { font-size: 12px; color: var(--text-sub); font-weight: bold; }
+        
+        /* 円グラフSVG */
+        svg.progress-ring { transform: rotate(-90deg); width: 100%; height: 100%; }
+        circle { fill: transparent; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+        .ring-bg { stroke: var(--border); }
+        .ring-val { stroke: var(--primary); }
+
+        /* ゴールテキスト */
+        .goal-status {
+            font-size: 14px; font-weight: bold; color: var(--text-main);
+            margin-bottom: 25px; background: var(--card-bg); padding: 8px 16px;
+            border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        /* ボタン群 */
-        .action-row { display: flex; gap: 20px; align-items: center; margin-bottom: 30px; }
+        /* アクション */
+        .action-row { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
         .icon-btn {
-            width: 44px; height: 44px; border-radius: 50%; background: var(--bg-color);
+            width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg);
             color: var(--text-main); border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer;
         }
         .check-btn {
-            width: 70px; height: 70px; border-radius: 50%; border: 4px solid var(--border);
+            width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--border);
             background: var(--card-bg); display: flex; align-items: center; justify-content: center;
-            font-size: 28px; color: var(--border); cursor: pointer; transition: all 0.2s;
+            font-size: 30px; color: var(--border); cursor: pointer; transition: all 0.2s;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         .check-btn.checked {
@@ -125,7 +116,7 @@
         .day-cell.today { border: 2px solid var(--text-main); font-weight: bold; }
         .day-cell.done { background: var(--primary); color: white; }
 
-        /* モーダル共通 */
+        /* モーダル */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--modal-bg); backdrop-filter: blur(5px); z-index: 200;
@@ -135,15 +126,17 @@
         .modal-card {
             background: var(--card-bg); width: 85%; max-width: 320px; padding: 25px;
             border-radius: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popUp 0.3s;
         }
-        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        input[type="text"] {
-            width: 100%; padding: 12px; margin: 15px 0; border-radius: 12px; border: 1px solid var(--border);
+        input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid var(--border);
             background: var(--bg-color); color: var(--text-main); font-size: 16px; box-sizing: border-box;
         }
-        .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
+        label { display: block; text-align: left; font-size: 12px; color: var(--text-sub); margin-top: 10px; margin-left: 5px;}
+        
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
         .btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-cancel { background: var(--bg-color); color: var(--text-sub); }
         .btn-primary { background: var(--primary); color: white; }
@@ -154,13 +147,8 @@
 </head>
 <body>
 
-    <div class="header-info">
-        <h2 style="margin:0; font-size:16px;">Habit Focus</h2>
-    </div>
-
     <div class="tab-scroll-container">
-        <div class="tab-list" id="tab-list">
-            </div>
+        <div class="tab-list" id="tab-list"></div>
     </div>
 
     <div id="content-area">
@@ -169,14 +157,20 @@
 
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3 id="modal-title">習慣を追加</h3>
-            <input type="text" id="habit-name-input" placeholder="習慣の名前 (例: 読書)">
+            <h3 id="modal-title" style="margin-top:0;">習慣の設定</h3>
+            
+            <label>習慣の名前</label>
+            <input type="text" id="habit-name-input" placeholder="例: 筋トレ">
+            
+            <label>目標日数 (0で目標なし)</label>
+            <input type="number" id="habit-goal-input" placeholder="例: 30" min="0">
+            
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal()">キャンセル</button>
                 <button class="btn btn-primary" id="save-btn">保存</button>
             </div>
             <div id="delete-area" style="margin-top:15px; display:none;">
-                <button class="btn btn-danger" style="width:100%" id="delete-btn">この習慣を削除</button>
+                <button class="btn btn-danger" style="width:100%" id="delete-btn">削除</button>
             </div>
         </div>
     </div>
@@ -190,7 +184,7 @@
         const todayStr = new Date().toISOString().split('T')[0];
         
         let habitsData = [];
-        let currentHabitId = null; // 編集用
+        let editIndex = -1;
 
         const plantLevels = [
             { threshold: 0, icon: "🌱", title: "Start" },
@@ -218,7 +212,7 @@
             tabList.innerHTML = '';
             contentArea.innerHTML = '';
 
-            // 習慣タブの生成
+            // タブ生成
             habitsData.forEach((habit, index) => {
                 const tab = document.createElement('div');
                 tab.className = `tab-item ${index === 0 ? 'active' : ''}`;
@@ -232,17 +226,12 @@
                 contentArea.appendChild(page);
             });
 
-            // 「＋」追加タブ
+            // 追加ボタン
             const addTab = document.createElement('div');
             addTab.className = 'tab-item add-tab';
             addTab.textContent = '＋';
             addTab.onclick = () => openAddModal();
             tabList.appendChild(addTab);
-
-            // 習慣が0個の場合の案内
-            if(habitsData.length === 0) {
-                contentArea.innerHTML = '<div style="text-align:center; padding:50px; color:#888;">上の「＋」ボタンから<br>習慣を追加してください</div>';
-            }
         }
 
         function createHabitPage(habit, index) {
@@ -251,25 +240,46 @@
             page.id = `page-${index}`;
 
             const count = habit.history.length;
-            const levelInfo = getLevelInfo(count);
+            const goal = habit.goal || 0;
             const isDoneToday = habit.history.includes(todayStr);
+            const levelInfo = getLevelInfo(count);
+
+            // 進捗計算
+            let percent = 0;
+            let statusText = `累計 ${count} 日`;
+            
+            if (goal > 0) {
+                percent = Math.min(100, (count / goal) * 100);
+                statusText = `${count} / ${goal} 日達成 (${Math.round(percent)}%)`;
+            }
+
+            // 円グラフ設定 (半径70, 円周約440)
+            const radius = 70;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percent / 100) * circumference;
 
             page.innerHTML = `
-                <div class="plant-area">
-                    <div class="speech-bubble">Lv.${Math.floor(count/5)+1}</div>
-                    <div class="plant-icon">${levelInfo.icon}</div>
-                    <div class="habit-level">${levelInfo.title} (累計${count}日)</div>
+                <div class="progress-wrapper">
+                    <svg class="progress-ring" width="160" height="160">
+                        <circle class="ring-bg" stroke-width="10" r="${radius}" cx="80" cy="80" />
+                        <circle class="ring-val" stroke-width="10" r="${radius}" cx="80" cy="80"
+                                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};" />
+                    </svg>
+                    <div class="plant-container">
+                        <div class="plant-icon">${levelInfo.icon}</div>
+                        <div class="habit-level">${levelInfo.title}</div>
+                    </div>
                 </div>
+
+                <div class="goal-status">${statusText}</div>
 
                 <div class="action-row">
                     <div class="icon-btn" onclick="openEditModal(${index})">⚙️</div>
-                    
                     <button class="check-btn ${isDoneToday ? 'checked' : ''}" 
                             onclick="updateHabit('${habit.id}', '${todayStr}', ${index})">
                         ${isDoneToday ? '✔' : '+'}
                     </button>
-                    
-                    <div class="icon-btn" style="opacity:0; pointer-events:none;">📊</div> 
+                    <div class="icon-btn" style="opacity:0; pointer-events:none;"></div>
                 </div>
             `;
             page.appendChild(createCalendar(habit, index));
@@ -314,44 +324,46 @@
             document.getElementById(`page-${index}`).classList.add('active');
         }
 
-        // --- データ更新 (チェック処理) ---
         async function updateHabit(id, dateStr, index) {
             const habit = habitsData.find(h => h.id == id);
             const isDone = habit.history.includes(dateStr);
-            const page = document.getElementById(`page-${index}`);
-
+            
             // ローカル更新
             if (isDone) habit.history = habit.history.filter(d => d !== dateStr);
             else {
                 habit.history.push(dateStr);
-                if(dateStr === todayStr) confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+                // ゴール達成時の演出
+                if(habit.goal > 0 && habit.history.length === habit.goal && dateStr === todayStr) {
+                     confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+                     alert("🎉 目標達成おめでとうございます！ 🎉");
+                } else if(dateStr === todayStr) {
+                     confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+                }
             }
-
-            // 再描画 (カレンダー & ボタン)
-            const oldCal = page.querySelector('.calendar-card');
-            page.replaceChild(createCalendar(habit, index), oldCal);
             
-            if(dateStr === todayStr) {
-                const btn = page.querySelector('.check-btn');
-                btn.classList.toggle('checked', !isDone);
-                btn.textContent = !isDone ? '✔' : '+';
-            }
+            // 再描画（丸ごと書き換えて進捗リングも更新）
+            const page = document.getElementById(`page-${index}`);
+            const newPage = createHabitPage(habit, index);
+            newPage.classList.add('active'); // active状態を引き継ぐ
+            // contentArea内の該当ページを差し替え
+            contentArea.replaceChild(newPage, page);
 
             // 送信
             postData({ action: 'toggle', id: id, date: dateStr, done: !isDone });
         }
 
-        // --- モーダル制御 (追加・編集・削除) ---
+        // --- モーダル制御 ---
         const modal = document.getElementById('edit-modal');
         const nameInput = document.getElementById('habit-name-input');
-        const title = document.getElementById('modal-title');
+        const goalInput = document.getElementById('habit-goal-input');
+        const modalTitle = document.getElementById('modal-title');
         const deleteArea = document.getElementById('delete-area');
-        let editIndex = -1;
 
         function openAddModal() {
             editIndex = -1;
-            title.textContent = "新しい習慣を追加";
+            modalTitle.textContent = "新しい習慣";
             nameInput.value = "";
+            goalInput.value = "";
             deleteArea.style.display = 'none';
             modal.classList.add('open');
         }
@@ -359,42 +371,41 @@
         function openEditModal(index) {
             editIndex = index;
             const habit = habitsData[index];
-            title.textContent = "習慣の編集";
+            modalTitle.textContent = "設定を編集";
             nameInput.value = habit.name;
+            goalInput.value = habit.goal || "";
             deleteArea.style.display = 'block';
             modal.classList.add('open');
         }
 
-        function closeModal() {
-            modal.classList.remove('open');
-        }
+        function closeModal() { modal.classList.remove('open'); }
 
-        // 保存ボタン
         document.getElementById('save-btn').onclick = async () => {
             const name = nameInput.value.trim();
+            const goal = parseInt(goalInput.value) || 0;
             if(!name) return;
             closeModal();
 
             if(editIndex === -1) {
                 // 追加
                 const tempId = Date.now();
-                habitsData.push({ id: tempId, name: name, history: [] });
+                habitsData.push({ id: tempId, name: name, history: [], goal: goal });
                 renderApp();
-                switchTab(habitsData.length - 1); // 最後のタブへ
-                await postData({ action: 'add', name: name });
+                switchTab(habitsData.length - 1);
+                await postData({ action: 'add', name: name, goal: goal });
             } else {
                 // 編集
                 const habit = habitsData[editIndex];
                 habit.name = name;
+                habit.goal = goal;
                 renderApp();
                 switchTab(editIndex);
-                await postData({ action: 'edit', id: habit.id, name: name });
+                await postData({ action: 'edit', id: habit.id, name: name, goal: goal });
             }
         };
 
-        // 削除ボタン
         document.getElementById('delete-btn').onclick = async () => {
-            if(!confirm("本当に削除しますか？履歴もすべて消えます。")) return;
+            if(!confirm("削除しますか？")) return;
             const habit = habitsData[editIndex];
             habitsData.splice(editIndex, 1);
             closeModal();
@@ -403,13 +414,8 @@
         };
 
         async function postData(payload) {
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
-            } catch(e) { console.error(e); }
+            try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); }
+            catch(e) { console.error(e); }
         }
 
         function getLevelInfo(count) {
