@@ -10,7 +10,7 @@
         :root {
             --bg-color: #f2f2f7;
             --card-bg: #ffffff;
-            --primary: #34c759; /* ←【修正】ここを緑色に戻しました */
+            --primary: #34c759; /* 緑色 */
             --danger: #ff3b30;
             --text-main: #1c1c1e;
             --text-sub: #8e8e93;
@@ -60,26 +60,30 @@
         .habit-page.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 進捗リング & 植物エリア */
-        .progress-wrapper {
-            position: relative; width: 180px; height: 180px; margin-bottom: 20px;
-            margin-left: auto; margin-right: auto; /* ←【修正】親要素内での中央揃え */
-        }
-        /* 植物を中心に配置 */
-        .plant-container {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%); /* ←【修正】完全な中央配置 */
+        /* 植物エリア (シンプル化) */
+        .plant-area {
             text-align: center;
+            margin-bottom: 15px;
             display: flex; flex-direction: column; align-items: center;
         }
-        .plant-icon { font-size: 60px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); margin-bottom: 5px; }
-        .habit-level { font-size: 12px; color: var(--text-sub); font-weight: bold; }
-        
-        /* 円グラフSVG */
-        svg.progress-ring { transform: rotate(-90deg); width: 100%; height: 100%; }
-        circle { fill: transparent; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
-        .ring-bg { stroke: var(--border); }
-        .ring-val { stroke: var(--primary); }
+        .plant-icon {
+            font-size: 80px; /* 少し大きく */
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            margin-bottom: 10px;
+        }
+        .habit-level { font-size: 13px; color: var(--text-sub); font-weight: bold; }
+
+        /* 進捗バー (新設) */
+        .progress-bar-container {
+            width: 80%; max-width: 240px; height: 12px;
+            background-color: var(--border);
+            border-radius: 6px; overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .progress-bar-fill {
+            height: 100%; background-color: var(--primary);
+            width: 0%; transition: width 0.6s ease-out;
+        }
 
         /* ゴールテキスト */
         .goal-status {
@@ -103,7 +107,7 @@
         }
         .check-btn.checked {
             background: var(--primary); border-color: var(--primary); color: white;
-            box-shadow: 0 5px 20px rgba(52, 199, 89, 0.4); /* ←【修正】影の色も緑系に */
+            box-shadow: 0 5px 20px rgba(52, 199, 89, 0.4);
         }
 
         /* カレンダー */
@@ -255,22 +259,14 @@
                 statusText = `${count} / ${goal} 日達成 (${Math.round(percent)}%)`;
             }
 
-            // 円グラフ設定
-            const radius = 70;
-            const circumference = 2 * Math.PI * radius;
-            const offset = circumference - (percent / 100) * circumference;
-
             page.innerHTML = `
-                <div class="progress-wrapper">
-                    <svg class="progress-ring" width="160" height="160">
-                        <circle class="ring-bg" stroke-width="10" r="${radius}" cx="80" cy="80" />
-                        <circle class="ring-val" stroke-width="10" r="${radius}" cx="80" cy="80"
-                                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};" />
-                    </svg>
-                    <div class="plant-container">
-                        <div class="plant-icon">${levelInfo.icon}</div>
-                        <div class="habit-level">${levelInfo.title}</div>
-                    </div>
+                <div class="plant-area">
+                    <div class="plant-icon">${levelInfo.icon}</div>
+                    <div class="habit-level">${levelInfo.title}</div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${percent}%;"></div>
                 </div>
 
                 <div class="goal-status">${statusText}</div>
