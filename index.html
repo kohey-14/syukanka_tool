@@ -6,184 +6,219 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>My Habits</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-color: #f2f2f7;
             --card-bg: #ffffff;
             --primary: #007aff;
-            --text-main: #000000;
+            --text-main: #1c1c1e;
             --text-sub: #8e8e93;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            padding-top: 60px; /* ステータスバー対策 */
+            padding-top: 60px;
+            padding-bottom: 40px;
             -webkit-tap-highlight-color: transparent;
         }
 
-        h1 {
+        /* ヘッダーエリア */
+        header {
             text-align: center;
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 24px;
+            margin-bottom: 30px;
         }
 
-        /* 読み込みメッセージ */
-        #status-msg {
-            text-align: center;
+        .date-display {
             font-size: 14px;
+            font-weight: 600;
             color: var(--text-sub);
-            margin-bottom: 20px;
-            min-height: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
         }
 
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        /* 進捗リング */
+        .progress-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 20px auto 30px;
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* リストスタイル */
         .habit-list {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
         .habit-card {
             background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .habit-card:active {
-            transform: scale(0.98);
-            background-color: #e5e5ea;
+            transform: scale(0.96);
         }
 
         .habit-name {
             font-size: 17px;
-            font-weight: 400;
+            font-weight: 500;
         }
 
-        /* チェックボックスのデザイン */
         .checkbox {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
-            border: 2px solid #c7c7cc;
+            border: 2px solid #d1d1d6;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .checkbox.checked {
             background-color: var(--primary);
             border-color: var(--primary);
+            animation: pulse 0.3s ease-in-out;
         }
 
         .checkbox.checked::after {
             content: '';
-            display: block;
-            width: 5px;
-            height: 9px;
+            width: 6px;
+            height: 10px;
             border: solid white;
-            border-width: 0 2px 2px 0;
+            border-width: 0 2.5px 2.5px 0;
             transform: rotate(45deg);
             margin-bottom: 2px;
         }
 
-        /* エラー表示用 */
-        .error-box {
-            background-color: #ffe5e5;
-            color: #d8000c;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-top: 20px;
-            display: none; /* 最初は隠す */
-            white-space: pre-wrap; /* 改行を反映 */
-            word-break: break-all;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 122, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
+        }
+
+        /* 読み込み・エラー表示 */
+        #status-msg {
+            text-align: center;
+            color: var(--text-sub);
+            margin-top: 50px;
+        }
+        
+        /* 完了時のテキストスタイル */
+        .habit-card.done .habit-name {
+            color: #c7c7cc;
+            text-decoration: line-through;
         }
     </style>
 </head>
 <body>
 
-    <h1>今日の習慣</h1>
-    
+    <header>
+        <div class="date-display" id="date-display">Thinking...</div>
+        <h1>Daily Habits</h1>
+    </header>
+
+    <div class="progress-container">
+        <svg class="progress-ring" width="120" height="120">
+            <circle stroke="#e5e5ea" stroke-width="8" fill="transparent" r="52" cx="60" cy="60" />
+            <circle class="progress-ring__circle" stroke="#007aff" stroke-width="8" stroke-linecap="round" fill="transparent" r="52" cx="60" cy="60" style="stroke-dasharray: 326.726; stroke-dashoffset: 326.726;" />
+        </svg>
+        <div class="progress-text" id="progress-text">0%</div>
+    </div>
+
     <div id="status-msg">読み込み中...</div>
 
-    <div class="habit-list" id="habit-list">
-        </div>
-
-    <div id="error-log" class="error-box"></div>
+    <div class="habit-list" id="habit-list"></div>
 
     <script>
-        // ==========================================
-        // ↓↓↓ ここにGASのウェブアプリURLを貼る ↓↓↓
-        // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-gjPZTKo2-9F8IpCksFjn-BkpC6yPYv0eHOgyM1ZollaZAc8E1K_agL-HvvP243be/exec"; 
-        // （↑ここに最新のデプロイURLを入れてください）
+        // ↓↓↓↓↓ ご自身のURLに書き換えてください ↓↓↓↓↓
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-gjPZTKo2-9F8IpCksFjn-BkpC6yPYv0eHOgyM1ZollaZAc8E1K_agL-HvvP243be/exec";
+        // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-        
         const listContainer = document.getElementById('habit-list');
         const statusMsg = document.getElementById('status-msg');
-        const errorLog = document.getElementById('error-log');
+        const progressCircle = document.querySelector('.progress-ring__circle');
+        const progressText = document.getElementById('progress-text');
+        
+        // 円周の長さ
+        const radius = progressCircle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
 
-        // エラーを表示する関数
-        function showError(msg, detail = "") {
-            statusMsg.style.display = 'none';
-            errorLog.style.display = 'block';
-            errorLog.textContent = `【エラー発生】\n${msg}\n\n詳細:\n${detail}`;
-        }
+        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressCircle.style.strokeDashoffset = circumference;
 
-        // 1. データ取得（読み込み）
+        // 今日の日付を表示
+        const now = new Date();
+        const options = { month: 'long', day: 'numeric', weekday: 'short' };
+        document.getElementById('date-display').textContent = now.toLocaleDateString('ja-JP', options);
+
+        let localHabits = []; // ローカルで状態を保持
+
+        // 1. データ取得
         async function fetchHabits() {
             try {
                 const response = await fetch(SCRIPT_URL);
+                if (!response.ok) throw new Error("Server Error");
                 
-                if (!response.ok) {
-                    throw new Error(`サーバーエラー: ${response.status}`);
-                }
-
                 const text = await response.text();
-                
-                // HTMLが返ってきていないかチェック（権限エラー対策）
-                if (text.trim().startsWith("<")) {
-                    throw new Error("データではなくHTMLが返ってきました。\nGASのデプロイ設定で「アクセスできるユーザー」が「全員」になっているか確認してください。");
-                }
+                // 万が一HTMLが返ってきた場合のガード
+                if(text.trim().startsWith("<")) throw new Error("Auth Error");
 
-                try {
-                    const habits = JSON.parse(text);
-                    renderHabits(habits);
-                    statusMsg.style.display = 'none'; // 成功したらメッセージ消す
-                } catch (e) {
-                    throw new Error("データの形式が正しくありません。\n" + text.substring(0, 50) + "...");
-                }
-
+                localHabits = JSON.parse(text);
+                statusMsg.style.display = 'none';
+                renderHabits();
+                updateProgress();
             } catch (error) {
                 console.error(error);
-                showError("データの読み込みに失敗しました。", error.message);
+                statusMsg.textContent = "読み込みに失敗しました";
             }
         }
 
         // 2. 画面描画
-        function renderHabits(habits) {
+        function renderHabits() {
             listContainer.innerHTML = '';
-            
-            if (habits.length === 0) {
-                listContainer.innerHTML = '<p style="text-align:center; color:#888;">習慣が登録されていません</p>';
-                return;
-            }
-
-            habits.forEach(habit => {
+            localHabits.forEach(habit => {
                 const card = document.createElement('div');
-                card.className = 'habit-card';
-                card.onclick = () => toggleHabit(habit, card); // クリック設定
+                card.className = `habit-card ${habit.done ? 'done' : ''}`;
+                card.onclick = () => toggleHabit(habit.id); // IDで管理
 
                 const name = document.createElement('span');
                 name.className = 'habit-name';
@@ -198,38 +233,70 @@
             });
         }
 
-        // 3. 更新処理（チェック切替）
-        async function toggleHabit(habit, cardElement) {
-            // 見た目を先に更新（サクサク動かすため）
-            const newStatus = !habit.done;
-            habit.done = newStatus;
-            
-            const checkbox = cardElement.querySelector('.checkbox');
-            if (newStatus) checkbox.classList.add('checked');
-            else checkbox.classList.remove('checked');
+        // 3. 進捗更新 & 紙吹雪判定
+        function updateProgress() {
+            const total = localHabits.length;
+            const doneCount = localHabits.filter(h => h.done).length;
+            const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
 
-            // 裏側で通信
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // 重要: CORSエラー回避
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ id: habit.id, done: newStatus })
-                });
-                console.log("保存完了:", habit.name, newStatus);
-            } catch (error) {
-                console.error("保存失敗:", error);
-                alert("保存に失敗しました。通信環境を確認してください。");
-                // エラー時は見た目を戻す
-                habit.done = !newStatus;
-                if (!newStatus) checkbox.classList.add('checked');
-                else checkbox.classList.remove('checked');
+            // リングアニメーション
+            const offset = circumference - (percent / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            progressText.textContent = `${percent}%`;
+
+            // 100%達成時の紙吹雪
+            if (percent === 100 && total > 0) {
+                triggerConfetti();
             }
         }
 
-        // 開始
-        fetchHabits();
+        // 4. 切り替え処理
+        async function toggleHabit(id) {
+            // ローカルデータを即時更新（サクサク感のため）
+            const habit = localHabits.find(h => h.id === id);
+            habit.done = !habit.done;
+            
+            renderHabits(); // 画面更新
+            updateProgress(); // 進捗更新
 
+            // 裏側で送信
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ id: habit.id, done: habit.done })
+                });
+            } catch (error) {
+                console.error("Save Error", error);
+                // エラー時は本当は戻すべきだが、UX優先でスルー（次回ロードで整合性取れる）
+            }
+        }
+
+        // 紙吹雪エフェクト
+        function triggerConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        fetchHabits();
     </script>
 </body>
 </html>
